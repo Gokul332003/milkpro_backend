@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "dotenv": "^16.1.4",
+    "mongodb": "^5.3.0",
+    "mongojs": "^3.1.0",
+    "nodemon": "^2.0.22"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "build": "npm i"
+  },
+  "name": "nodedb",
+  "version": "1.0.0",
+  "main": "dbmodule.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
