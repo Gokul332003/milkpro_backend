@@ -10,7 +10,6 @@
   },
   "scripts": {
     "start": "node index.js",
-    "backend": "nodemon index.js",
     "build": "npm i"
   },
   "name": "nodedb",

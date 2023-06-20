@@ -5,9 +5,8 @@ const app = express();
 
 require("dotenv").config();
 
-app.use(cors({
-  origin: ["http://localhost:3000", "https://mern-task-app.onrender.com"]
-}));
+app.use(cors());
+
 app.use(express.json());
 
 // MongoDB Configuration
@@ -81,6 +80,6 @@ app.put('/sales/:buyer/:date', async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
+app.listen(process.env.PORT || 3001, () => {
   console.log('Server is listening on port 3001');
 });
