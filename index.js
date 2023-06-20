@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const app = express();
+
 require("dotenv").config();
 
 app.use(cors({
@@ -10,7 +11,7 @@ app.use(cors({
 app.use(express.json());
 
 // MongoDB Configuration
-mongoose.connect('mongodb://127.0.0.1:27017/milk_pro', {
+mongoose.connect('mongodb+srv://root:Gokul@332003@mern.8xxkbvf.mongodb.net/milk_pro?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
