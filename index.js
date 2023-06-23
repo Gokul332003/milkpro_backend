@@ -80,6 +80,19 @@ app.put('/sales/:buyer/:date', async (req, res) => {
   }
 });
 
+app.delete('/sales/:buyer/:date', async (req, res) => {
+  try {
+    const { buyer, date } = req.params;
+
+    await Sale.deleteOne({ buyer, date });
+
+    res.status(200).json({ message: 'Sale deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete sale:', error);
+    res.status(500).json({ error: 'Failed to delete sale' });
+  }
+});
+
 app.listen(process.env.PORT || 3001, () => {
   console.log('Server is listening on port 3001');
 });
