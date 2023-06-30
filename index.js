@@ -31,12 +31,11 @@ app.post('/users', async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const user = await User.findOne({ username }).populate('buyers');
+    const user = await User.findOne({ username });
 
     if (user) {
       if (user.password === password) {
-        const buyerNames = user.buyers.map((buyer) => buyer.name);
-        res.status(200).json({ message: 'Login successful', buyerNames });
+        res.status(200).json({ message: 'Login successful' });
       } else {
         res.status(401).json({ error: 'Invalid password' });
       }
