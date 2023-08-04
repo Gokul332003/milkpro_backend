@@ -121,6 +121,19 @@ app.delete('/sales/:buyer/:date', async (req, res) => {
   }
 });
 
+app.delete('/sales/:buyer/reset', async (req, res) => {
+  try {
+    const buyer = req.params.buyer;
+
+    await Sale.deleteMany({ buyer });
+
+    res.status(200).json({ message: `Sales data reset for ${buyer}.` });
+  } catch (error) {
+    console.error('Failed to reset sales data:', error);
+    res.status(500).json({ error: 'Failed to reset sales data' });
+  }
+});
+
 app.listen(process.env.PORT || 3001, () => {
   console.log('Server is listening on port 3001');
 });
