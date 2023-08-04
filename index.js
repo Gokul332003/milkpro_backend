@@ -1,3 +1,5 @@
+// server.js (Backend)
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -61,13 +63,7 @@ const Sale = mongoose.model('Sale', saleSchema);
 app.get('/sales', async (req, res) => {
   try {
     const sales = await Sale.find();
-    const salesData = sales.map((sale) => ({
-      buyer: sale.buyer,
-      quantity: sale.quantity,
-      date: sale.date.toString(),
-      milkType: sale.milkType,
-    }));
-    res.json(salesData);
+    res.json(sales);
   } catch (error) {
     console.error('Failed to fetch sales data:', error);
     res.status(500).json({ error: 'Failed to fetch sales data' });
@@ -123,7 +119,7 @@ app.delete('/sales/:buyer/:date', async (req, res) => {
 
 app.delete('/sales/:buyer/reset', async (req, res) => {
   try {
-    const buyer = req.params.buyer;
+    const { buyer } = req.params;
 
     await Sale.deleteMany({ buyer });
 
@@ -134,6 +130,18 @@ app.delete('/sales/:buyer/reset', async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || 3001, () => {
-  console.log('Server is listening on port 3001');
+app.delete('/sales/all', async (req, res) => {
+  try {
+    await Sale.deleteMany();
+
+    res.status(200).json({ message: 'All sales data has been reset.' });
+  } catch (error) {
+    console.error('Failed to reset all sales data:', error);
+    res.status(500).json({ error: 'Failed to reset all sales data' });
+  }
+});
+
+const port = process.env.PORT || 3001;
+app.listen(port, () => {
+  console.log(`Server is listening on port ${port}`);
 });
