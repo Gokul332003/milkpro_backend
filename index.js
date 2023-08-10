@@ -117,7 +117,7 @@ app.delete('/sales/:buyer/:date', async (req, res) => {
   }
 });
 
-app.delete('/sales/:buyer/reset', async (req, res) => {
+app.deleteall('/sales/:buyer/reset', async (req, res) => {
   try {
     const { buyer } = req.params;
 
@@ -130,16 +130,16 @@ app.delete('/sales/:buyer/reset', async (req, res) => {
   }
 });
 
-app.delete('/sales/all', async (req, res) => {
-  try {
-    await Sale.deleteMany();
+// app.delete('/sales/all', async (req, res) => {
+//   try {
+//     await Sale.deleteMany();
 
-    res.status(200).json({ message: 'All sales data has been reset.' });
-  } catch (error) {
-    console.error('Failed to reset all sales data:', error);
-    res.status(500).json({ error: 'Failed to reset all sales data' });
-  }
-});
+//     res.status(200).json({ message: 'All sales data has been reset.' });
+//   } catch (error) {
+//     console.error('Failed to reset all sales data:', error);
+//     res.status(500).json({ error: 'Failed to reset all sales data' });
+//   }
+// });
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
