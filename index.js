@@ -55,7 +55,7 @@ const saleSchema = new mongoose.Schema({
   buyer: String,
   quantity: Number,
   date: Date,
-  milkType: String,
+  // milkType: String,
 });
 
 const Sale = mongoose.model('Sale', saleSchema);
@@ -117,7 +117,7 @@ app.delete('/sales/:buyer/:date', async (req, res) => {
   }
 });
 
-app.deleteall('/sales/:buyer/reset', async (req, res) => {
+app.delete('/sales/:buyer/reset', async (req, res) => {
   try {
     const { buyer } = req.params;
 
