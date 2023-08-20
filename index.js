@@ -120,9 +120,7 @@ app.delete('/sales/:buyer/:date', async (req, res) => {
 app.delete('/sales/:buyer/reset', async (req, res) => {
   try {
     const { buyer } = req.params;
-
     await Sale.deleteMany({ buyer });
-
     res.status(200).json({ message: `Sales data reset for ${buyer}.` });
   } catch (error) {
     console.error('Failed to reset sales data:', error);
