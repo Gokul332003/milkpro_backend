@@ -1,5 +1,3 @@
-// server.js (Backend)
-
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -9,7 +7,6 @@ require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
-
 // MongoDB Configuration
 mongoose.connect('mongodb+srv://root:Gokul@332003@mern.8xxkbvf.mongodb.net/milk_pro?retryWrites=true&w=majority', {
   useNewUrlParser: true,
@@ -50,12 +47,10 @@ app.post('/users', async (req, res) => {
   }
 });
 
-
 const saleSchema = new mongoose.Schema({
   buyer: String,
   quantity: Number,
   date: Date,
-  // milkType: String,
 });
 
 const Sale = mongoose.model('Sale', saleSchema);
@@ -90,6 +85,7 @@ app.post('/sales', async (req, res) => {
   }
 });
 
+
 app.put('/sales/:buyer/:date', async (req, res) => {
   try {
     const { buyer, date } = req.params;
@@ -117,27 +113,88 @@ app.delete('/sales/:buyer/:date', async (req, res) => {
   }
 });
 
+const resetSchema = new mongoose.Schema({
+  buyer: String,
+  lastReset: Date,
+});
+
+const Reset = mongoose.model('Reset', resetSchema);
+
 app.delete('/sales/:buyer/reset', async (req, res) => {
   try {
     const { buyer } = req.params;
+
+    // Delete sales data for the buyer
     await Sale.deleteMany({ buyer });
+
     res.status(200).json({ message: `Sales data reset for ${buyer}.` });
   } catch (error) {
     console.error('Failed to reset sales data:', error);
     res.status(500).json({ error: 'Failed to reset sales data' });
   }
 });
+// ... (billing schema and endpoint for billing data)
+const billingSchema = new mongoose.Schema({
+  buyer: String,
+  month: Number,
+  year: Number,
+  totalAmount: Number,
+});
 
-// app.delete('/sales/all', async (req, res) => {
-//   try {
-//     await Sale.deleteMany();
+const Billing = mongoose.model('Billing', billingSchema);
 
-//     res.status(200).json({ message: 'All sales data has been reset.' });
-//   } catch (error) {
-//     console.error('Failed to reset all sales data:', error);
-//     res.status(500).json({ error: 'Failed to reset all sales data' });
-//   }
-// });
+app.get('/billing/:buyer/:year/:month', async (req, res) => {
+  try {
+    const { buyer, year, month } = req.params;
+    const billingData = await Billing.findOne({ buyer, year, month });
+    res.json(billingData || {});
+  } catch (error) {
+    console.error('Failed to fetch billing data:', error);
+    res.status(500).json({ error: 'Failed to fetch billing data' });
+  }
+});
+
+const calculateTotalAmountForMonth = (salesData) => {
+  // Calculate the total amount based on the sales data for the month
+  const pricePerLiter = 45; // Adjust as needed
+  return salesData.reduce((total, sale) => total + sale.quantity * pricePerLiter, 0);
+};
+
+const monthlyReset = async () => {
+  const currentDate = new Date();
+  const lastResetDate = new Date(monthlyRecords.lastReset || 0);
+
+  if (currentDate.getMonth() !== lastResetDate.getMonth()) {
+    // Perform reset logic
+    try {
+      // Fetch sales data for the past month
+      const salesForMonth = await Sale.find({
+        date: {
+          $gte: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+        },
+      });
+
+      // Calculate the total amount for the month
+      const totalAmount = calculateTotalAmountForMonth(salesForMonth);
+
+      // Create or update billing record
+      const billingData = await Billing.findOneAndUpdate(
+        { buyer, year: currentDate.getFullYear(), month: currentDate.getMonth() },
+        { buyer, year: currentDate.getFullYear(), month: currentDate.getMonth(), totalAmount },
+        { upsert: true, new: true }
+      );
+
+      // Update the last reset date on the server
+      await Reset.updateOne({ buyer }, { lastReset: new Date() }, { upsert: true });
+
+      setMonthlyRecords({ lastReset: currentDate.getTime() });
+      fetchSalesData(); // Fetch data again after the reset
+    } catch (error) {
+      console.error('Error resetting data:', error);
+    }
+  }
+};
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
