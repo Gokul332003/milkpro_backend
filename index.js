@@ -85,7 +85,6 @@ app.post('/sales', async (req, res) => {
   }
 });
 
-
 app.put('/sales/:buyer/:date', async (req, res) => {
   try {
     const { buyer, date } = req.params;
@@ -113,88 +112,25 @@ app.delete('/sales/:buyer/:date', async (req, res) => {
   }
 });
 
-const resetSchema = new mongoose.Schema({
-  buyer: String,
-  lastReset: Date,
-});
-
-const Reset = mongoose.model('Reset', resetSchema);
-
-app.delete('/sales/:buyer/reset', async (req, res) => {
+app.delete('/sales/reset/:buyer/:date', async (req, res) => {
   try {
-    const { buyer } = req.params;
+    const { buyer, date } = req.params;
 
-    // Delete sales data for the buyer
-    await Sale.deleteMany({ buyer });
+    // Parse the date parameter as a Date object
+    const resetDate = new Date(date);
 
-    res.status(200).json({ message: `Sales data reset for ${buyer}.` });
+    // Implement your logic to reset sales data for the given buyer and date here
+    // Use the 'buyer' and 'resetDate' variables in your logic
+
+    // Delete all sales data for the specified buyer and date
+    await Sale.deleteMany({ buyer, date: resetDate });
+
+    res.status(200).json({ message: 'Sales data reset successfully' });
   } catch (error) {
-    console.error('Failed to reset sales data:', error);
-    res.status(500).json({ error: 'Failed to reset sales data' });
+    console.error('Error resetting sales data:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
-// ... (billing schema and endpoint for billing data)
-const billingSchema = new mongoose.Schema({
-  buyer: String,
-  month: Number,
-  year: Number,
-  totalAmount: Number,
-});
-
-const Billing = mongoose.model('Billing', billingSchema);
-
-app.get('/billing/:buyer/:year/:month', async (req, res) => {
-  try {
-    const { buyer, year, month } = req.params;
-    const billingData = await Billing.findOne({ buyer, year, month });
-    res.json(billingData || {});
-  } catch (error) {
-    console.error('Failed to fetch billing data:', error);
-    res.status(500).json({ error: 'Failed to fetch billing data' });
-  }
-});
-
-const calculateTotalAmountForMonth = (salesData) => {
-  // Calculate the total amount based on the sales data for the month
-  const pricePerLiter = 45; // Adjust as needed
-  return salesData.reduce((total, sale) => total + sale.quantity * pricePerLiter, 0);
-};
-
-const monthlyReset = async () => {
-  const currentDate = new Date();
-  const lastResetDate = new Date(monthlyRecords.lastReset || 0);
-
-  if (currentDate.getMonth() !== lastResetDate.getMonth()) {
-    // Perform reset logic
-    try {
-      // Fetch sales data for the past month
-      const salesForMonth = await Sale.find({
-        date: {
-          $gte: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
-          $lt: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
-        },
-      });
-
-      // Calculate the total amount for the month
-      const totalAmount = calculateTotalAmountForMonth(salesForMonth);
-
-      // Create or update billing record
-      const billingData = await Billing.findOneAndUpdate(
-        { buyer, year: currentDate.getFullYear(), month: currentDate.getMonth() },
-        { buyer, year: currentDate.getFullYear(), month: currentDate.getMonth(), totalAmount },
-        { upsert: true, new: true }
-      );
-
-      // Update the last reset date on the server
-      await Reset.updateOne({ buyer }, { lastReset: new Date() }, { upsert: true });
-
-      setMonthlyRecords({ lastReset: currentDate.getTime() });
-      fetchSalesData(); // Fetch data again after the reset
-    } catch (error) {
-      console.error('Error resetting data:', error);
-    }
-  }
-};
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
